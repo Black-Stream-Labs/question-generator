@@ -8,11 +8,34 @@
     - [ ] Maths
     - [ ] Pseudo-curricula without database (see round 2)
 
+#### Generator interface
+
+Questions can be gathered via `/questions` with a query string, e.g.
+
+    GET /questions?subject=Maths
+
+With the following parameters:
+
+- subject - the subject of the curriculum
+- count - how many to generate
+- answer_count - how many answers to generate
+
+#### Question object
+
+The questions will be returned as an array of objects with the following
+fields:
+
+- text - the text of the question, i.e. the actual question being asked
+- answers - an array of possible answers
+- correct_answer - an integer identifying which answer is correct
+- explanation - text explaining the answer, if appropriate
+
 ## Round 2
 
 ### API
 
-- [ ] 
+- [ ] Other subjects
+    - [ ] Ones that pull from database
 
 ### Database
 
