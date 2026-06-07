@@ -8,13 +8,10 @@ use poem_openapi::{
     Object
 };
 
-#[derive(Object)]
-struct Question {
-    text: String,
-    answers: Vec<String>,
-    correct_answer: u32,
-    explanation: Option<String>,
-}
+use question_generator::{
+    Question,
+    generator::maths::generate as generate_maths
+};
 
 // TODO - we can put this in a module, so we can keep it tidy when we add the
 // metadata API alongside it
@@ -31,13 +28,8 @@ struct QuestionsApi;
 impl QuestionsApi {
     /// Hello world
     #[oai(path = "/questions", method = "get")]
-    async fn index(&self, subject: Query<Option<String>>) -> Json<Question> {
-        Json(Question {
-            text: "some_text".to_string(),
-            answers: vec![ "A".to_string(), "B".to_string(), "C".to_string() ],
-            correct_answer: 0,
-            explanation: None
-        })
+    async fn index(&self, subject: Query<Option<String>>) -> Json<Vec<Question>> {
+        Json(generate_maths())
     }
 }
 
