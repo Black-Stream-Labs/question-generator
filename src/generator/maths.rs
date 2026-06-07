@@ -33,33 +33,31 @@ pub fn generate(params: GeneratorParameters, maths_params: MathsGeneratorParamet
 }
 
 fn generate_answers(correct_answer:i32, count:usize, spread: i32, allow_negative: bool) -> (Vec<String>, usize) {
-    let mut answers : Vec<String> = vec![];
+    // Sometimes we compare count to spread, but it's really supposed to represent the size of the
+    // vector, so make a copy for the peripheral logic
+    let count_i32 = count as i32;
 
-    if spread < count.try_into().unwrap() {
+    if spread < count_i32 {
         panic!("Spread must be at least as big as count!");
     }
 
-    while answers.len() != count {
-        let range = if allow_negative {
-            -spread/2 ..= spread/2
-        }
-        else {
-            1 ..= spread
-        };
-
-        let random_answer = correct_answer + rand::random_range(range);
-        if random_answer == correct_answer {
-            // Meh, scrap it, we're already faster than Go
-            continue;
-        }
-
-        answers.push(random_answer.to_string());
+    let range = if allow_negative {
+        -(spread + count_i32) / 2 ..= (spread + count_i32) / 2
     }
+    else {
+        count_i32 ..= spread + count_i32
+    };
+
+    let mut wrong_answers : Vec<i32> = range.collect();
+    wrong_answers.retain(|x| *x != correct_answer);
+    wrong_answers.shuffle(&mut rand::rng());
+
+    let mut answers = wrong_answers[0..count].to_vec();
 
     let correct_answer_idx : usize = rand::random_range(0..answers.len());
-    answers.insert(correct_answer_idx, correct_answer.to_string());
+    answers.insert(correct_answer_idx, correct_answer);
 
-    return (answers, correct_answer_idx);
+    return (answers.iter().map(|n| n.to_string()).collect(), correct_answer_idx);
 }
 
 fn generate_addition(params: &GeneratorParameters) -> Question {
