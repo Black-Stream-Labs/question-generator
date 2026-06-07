@@ -1,15 +1,12 @@
 use crate::{Question, GeneratorParameters};
-use rand::seq::IndexedRandom;
+use rand::seq::{IndexedRandom, SliceRandom};
 use std::cmp;
 
 pub enum ArithmeticOperation {
     Addition,
     Subtraction,
     Multiplication,
-    IntegerDivision,
-    IntegerDivisionWithRemainder,
-    //DivisionWithFraction,
-//    DivisionWithDecimal
+    Division,
 }
 
 pub struct MathsGeneratorParameters {
@@ -26,8 +23,7 @@ pub fn generate(params: GeneratorParameters, maths_params: MathsGeneratorParamet
             ArithmeticOperation::Addition => generate_addition(&params),
             ArithmeticOperation::Subtraction => generate_subtraction(&params),
             ArithmeticOperation::Multiplication => generate_multiplication(&params),
-            ArithmeticOperation::IntegerDivision => generate_integer_division(&params),
-            ArithmeticOperation::IntegerDivisionWithRemainder => generate_integer_division_with_remainder(&params),
+            ArithmeticOperation::Division => generate_division(&params),
         };
 
         questions.push(question);
@@ -107,6 +103,12 @@ fn generate_multiplication(params: &GeneratorParameters) -> Question {
         correct_answer: correct_answer_idx,
         explanation: None
     }
+}
+
+fn generate_division(params: &GeneratorParameters) -> Question {
+    // TODO - here we inspect the curriculum (not yet implemented) to decide
+    // which types of division we're going to use
+    generate_integer_division(&params)
 }
 
 fn generate_integer_division(params: &GeneratorParameters) -> Question {
