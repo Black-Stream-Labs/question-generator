@@ -42,8 +42,7 @@ impl QuestionsApi {
             },
             MathsGeneratorParameters {
                 operations: vec![
-                    ArithmeticOperation::IntegerDivision, ArithmeticOperation::IntegerDivisionWithRemainder,
-
+                    ArithmeticOperation::Division
                 ]
             }
         ))

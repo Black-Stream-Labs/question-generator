@@ -32,13 +32,27 @@ pub fn generate(params: GeneratorParameters, maths_params: MathsGeneratorParamet
     return questions;
 }
 
-// FIXME - this isn't entirely so useful because the sensible range of answers
-// depends on the question type, e.g. additions can't come out negative!
-fn generate_answers(correct_answer:i32, count:usize, spread: i32) -> (Vec<String>, usize) {
+fn generate_answers(correct_answer:i32, count:usize, spread: i32, allow_negative: bool) -> (Vec<String>, usize) {
     let mut answers : Vec<String> = vec![];
 
-    for _ in 1 .. count {
-        let random_answer = correct_answer + (0 - rand::random_range(1..spread)/2);
+    if spread < count.try_into().unwrap() {
+        panic!("Spread must be at least as big as count!");
+    }
+
+    while answers.len() != count {
+        let range = if allow_negative {
+            -spread/2 ..= spread/2
+        }
+        else {
+            1 ..= spread
+        };
+
+        let random_answer = correct_answer + rand::random_range(range);
+        if random_answer == correct_answer {
+            // Meh, scrap it, we're already faster than Go
+            continue;
+        }
+
         answers.push(random_answer.to_string());
     }
 
@@ -54,7 +68,7 @@ fn generate_addition(params: &GeneratorParameters) -> Question {
 
     let correct_answer = num_1 + num_2;
 
-    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20);
+    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, false);
 
     Question {
         text: format!("{} + {} = ?", num_1, num_2),
@@ -79,7 +93,7 @@ fn generate_subtraction(params: &GeneratorParameters) -> Question {
         bignum - smlnum
     };
 
-    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20);
+    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, allow_negative);
 
     Question {
         text: format!("{} + {} = ?", num_1, num_2),
@@ -95,7 +109,7 @@ fn generate_multiplication(params: &GeneratorParameters) -> Question {
 
     let correct_answer = num_1 * num_2;
 
-    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20);
+    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, false);
 
     Question {
         text: format!("{} × {} = ?", num_1, num_2),
@@ -120,7 +134,7 @@ fn generate_integer_division(params: &GeneratorParameters) -> Question {
 
     let correct_answer = num_2;
 
-    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20);
+    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, false);
 
     Question {
         text: format!("{} ÷ {} = ?", numerator, num_1),
