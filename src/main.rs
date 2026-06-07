@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use poem::{listener::TcpListener, Route, Server};
 use poem_openapi::{
     payload::PlainText,
@@ -26,6 +27,11 @@ struct QuestionsApi;
 // which algorithm gets run depending on the query.
 //
 // For now we only have arithmetic so we can just use that directly...
+//
+// TODO - this is going to get cumbersome with the number of parameters we
+// could end up with just by combining all the fields from all the generators,
+// so we might be better off having a POST endpoint that can accept a JSON
+// object containing all the generator params.
 #[OpenApi]
 impl QuestionsApi {
     /// Hello world
@@ -33,7 +39,8 @@ impl QuestionsApi {
     async fn index(&self,
         subject: Query<Option<String>>,
         count: Query<Option<usize>>,
-        answer_count: Query<Option<usize>>
+        answer_count: Query<Option<usize>>,
+        operations: Query<String>
     ) -> Json<Vec<Question>> {
         Json(generate_maths(
             GeneratorParameters {
@@ -41,9 +48,8 @@ impl QuestionsApi {
                 answer_count: answer_count.unwrap_or(3)
             },
             MathsGeneratorParameters {
-                operations: vec![
-                    ArithmeticOperation::Division
-                ]
+                operations:
+                    operations.split(',').collect::<Vec<_>>().iter().map(|o| ArithmeticOperation::from_str(o).unwrap()).collect()
             }
         ))
     }

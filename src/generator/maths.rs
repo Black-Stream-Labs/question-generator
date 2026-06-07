@@ -5,7 +5,9 @@
 use crate::{Question, GeneratorParameters};
 use rand::seq::{IndexedRandom, SliceRandom};
 use std::cmp;
+use strum_macros::EnumString;
 
+#[derive(EnumString)]
 pub enum ArithmeticOperation {
     Addition,
     Subtraction,

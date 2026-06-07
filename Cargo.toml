@@ -9,3 +9,5 @@ poem-openapi = { version = "5", features = ["swagger-ui"] }
 serde = "1.0.228"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 rand = "0.10"
+strum = "0.28.0"
+strum_macros = "0.28.0"
