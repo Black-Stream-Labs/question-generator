@@ -1,3 +1,7 @@
+//! Generate maths questions
+//!
+//! Provides an interface to generate maths questions, using the generic GeneratorParameters from
+//! the crate as well as its own generator parameters struct.
 use crate::{Question, GeneratorParameters};
 use rand::seq::{IndexedRandom, SliceRandom};
 use std::cmp;
@@ -9,11 +13,16 @@ pub enum ArithmeticOperation {
     Division,
 }
 
+/// Defines parameters for generating maths problems
+///
+/// operations: A vector of ArithmeticOperation values. Questions will pull from all specified
+/// values, distributed at random.
 pub struct MathsGeneratorParameters {
     pub operations: Vec<ArithmeticOperation>
 }
 
-
+/// Interface into generating questions.
+///
 pub fn generate(params: GeneratorParameters, maths_params: MathsGeneratorParameters) -> Vec<Question> {
     let mut questions : Vec<Question> = vec![];
 
@@ -32,6 +41,13 @@ pub fn generate(params: GeneratorParameters, maths_params: MathsGeneratorParamet
     return questions;
 }
 
+// Generates `count` answers, including `correct_answer`.
+//
+// Answers will be taken from a range `spread` wide centred around `correct_answer` (sort of -
+// depending on the parity of `spread`, it may be 1 bigger).
+//
+// If allow_negative is false, the range is adjusted so that the lowest value is 1, which means
+// `correct_answer` will not be in the middle of the range if it is too close to zero.
 fn generate_answers(correct_answer:i32, count:usize, spread: i32, allow_negative: bool) -> (Vec<String>, usize) {
     // Sometimes we compare count to spread, but it's really supposed to represent the size of the
     // vector, so make a copy for the peripheral logic
@@ -45,7 +61,10 @@ fn generate_answers(correct_answer:i32, count:usize, spread: i32, allow_negative
         -(spread + count_i32) / 2 ..= (spread + count_i32) / 2
     }
     else {
-        count_i32 ..= spread + count_i32
+        // If the lowest value would be negative, work out what it would be and add it back on,
+        // plus 1 so it's not zero
+        let offset = if spread/2 > correct_answer { spread/2 - correct_answer + 1 } else { 0 };
+        count_i32 + offset ..= spread + count_i32 + offset
     };
 
     let mut wrong_answers : Vec<i32> = range.collect();
