@@ -10,6 +10,8 @@ use poem_openapi::{
 
 use question_generator::{
     Question,
+    GeneratorParameters,
+    generator::maths::{ArithmeticOperation, MathsGeneratorParameters},
     generator::maths::generate as generate_maths
 };
 
@@ -28,8 +30,23 @@ struct QuestionsApi;
 impl QuestionsApi {
     /// Hello world
     #[oai(path = "/questions", method = "get")]
-    async fn index(&self, subject: Query<Option<String>>) -> Json<Vec<Question>> {
-        Json(generate_maths())
+    async fn index(&self,
+        subject: Query<Option<String>>,
+        count: Query<Option<usize>>,
+        answer_count: Query<Option<usize>>
+    ) -> Json<Vec<Question>> {
+        Json(generate_maths(
+            GeneratorParameters {
+                count: count.unwrap_or(3),
+                answer_count: answer_count.unwrap_or(3)
+            },
+            MathsGeneratorParameters {
+                operations: vec![
+                    ArithmeticOperation::IntegerDivision, ArithmeticOperation::IntegerDivisionWithRemainder,
+
+                ]
+            }
+        ))
     }
 }
 
