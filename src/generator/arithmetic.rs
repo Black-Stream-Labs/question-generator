@@ -20,21 +20,22 @@ pub enum ArithmeticOperation {
     Division,
 }
 
-/// Defines parameters for generating maths problems
-///
-/// operations: A vector of ArithmeticOperation values. Questions will pull from all specified
-/// values, distributed at random.
-pub struct MathsGeneratorParameters {
-    pub operations: Vec<ArithmeticOperation>
-}
-
 /// Interface into generating questions.
 ///
-pub fn generate(params: GeneratorParameters, maths_params: MathsGeneratorParameters) -> Vec<Question> {
+/// Honoured values from the curriculum will be area, stage, level, and difficulty.
+/// Currently, area is used to define what operations to use, and difficulty will control the size
+/// of numbers used in the problems.
+pub fn generate(params: GeneratorParameters) -> Vec<Question> {
     let mut questions : Vec<Question> = vec![];
 
+    let operations : Vec<_> = params.curriculum.area.as_ref().unwrap_or(&"Addition".to_string())
+        .split(',')
+        .collect::<Vec<_>>().iter()
+        .map(|o| ArithmeticOperation::from_str(o).unwrap())
+        .collect();
+
     for _ in 0 .. params.count {
-        let operation = maths_params.operations.choose(&mut rand::rng()).unwrap();
+        let operation = operations.choose(&mut rand::rng()).unwrap();
         let question = match operation {
             ArithmeticOperation::Addition => generate_addition(&params),
             ArithmeticOperation::Subtraction => generate_subtraction(&params),
