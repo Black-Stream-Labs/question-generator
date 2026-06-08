@@ -2,10 +2,56 @@
 
 ## General
 
+### API errors
+
 Figure out how Poem handles errors - passing an invalid value to `operations`
 panics, but Poem doesn't pick it up and turn it into a 400.
 
 Try this https://deepwiki.com/poem-web/poem/2.5-error-handling
+
+### DB or code?
+
+How to handle curriculum values? Most sensible from a Rust perspective seems to
+me to use the enums and structs to define what options exist, but most sensible
+from a flexibility perspective is to use the database.
+
+The issue is that the maths generator is algorithmic, and will entirely be
+based on the code. The types of questions that show up will be based on the
+stage and level and therefore what sort of operations the student is expected
+to know at that stage, but that requires putting all known stages and levels
+into the code.
+
+Compare that to literally every other generator, which will pull questions from
+the database, and therefore the values for subject, level, stage, and
+difficulty can all be compared to the metadata for the questions and thus it's
+just a filter on provided data. In that respect, the options for a curriculum
+are flexible and can easily come from the database.
+
+One option is to have each generator type able to provide its set of options,
+which would imply that the API would require you to select the generator type
+in order to know what options there are for the rest of it. This could be done
+by requiring you to select your subject in order to know what curricula there
+are available to it.
+
+That means an enumeration of subjects is required, which will be a combination
+of code and database options. We want the lib consumer to be able to decide
+what subjects it actually interfaces with
+
+#### Actual answer
+
+The generator should be an object and it should hold strategy objects. We will
+need a trait for strategy objects that can tell the generator what values it
+will accept for generator params, including curricula (perhaps as a visitor
+pattern, so the generator just asks it if it can handle a given params
+object). One will be a fallback object, which will just get given the params,
+so at least one object will not be allowed to answer no.
+
+The user of the library will construct the generator and supply the strategy
+objects, which means they can create their own as well.
+
+The strategy objects will be able to report how you can structure their params,
+so the user of the library can collate all the different options to present to
+the end user, validate forms etc.
 
 ## Round 1
 
