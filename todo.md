@@ -1,11 +1,18 @@
 # Stuff to do for this API
 
+## General
+
+Figure out how Poem handles errors - passing an invalid value to `operations`
+panics, but Poem doesn't pick it up and turn it into a 400.
+
+Try this https://deepwiki.com/poem-web/poem/2.5-error-handling
+
 ## Round 1
 
 ### API
 
 - [ ] Question generator endpoint
-    - [ ] Maths
+    - [x] Maths
     - [ ] Pseudo-curricula without database (see round 2)
 
 #### Generator interface

@@ -1,11 +1,14 @@
 use std::str::FromStr;
-use poem::{listener::TcpListener, Route, Server};
+use serde::Deserialize;
+// FIXME - web::Query params don't show up in the generated spec, but
+// poem_openapi::params::Query doesn't like using a struct. I can probably
+// implement the extractor for it but not now
+use poem::{listener::TcpListener, Route, Server, web::Query};
 use poem_openapi::{
     payload::PlainText,
     payload::Json,
     OpenApi,
     OpenApiService,
-    param::Query,
     Object
 };
 
@@ -15,6 +18,17 @@ use question_generator::{
     generator::maths::{ArithmeticOperation, MathsGeneratorParameters},
     generator::maths::generate as generate_maths
 };
+
+#[derive(Deserialize)]
+struct CombinedQueryParams {
+    // GeneratorParameters
+    subject: Option<String>,
+    count: Option<usize>,
+    answer_count: Option<usize>,
+
+    // MathsGeneratorParameters
+    operations: String
+}
 
 // TODO - we can put this in a module, so we can keep it tidy when we add the
 // metadata API alongside it
@@ -37,19 +51,16 @@ impl QuestionsApi {
     /// Hello world
     #[oai(path = "/questions", method = "get")]
     async fn index(&self,
-        subject: Query<Option<String>>,
-        count: Query<Option<usize>>,
-        answer_count: Query<Option<usize>>,
-        operations: Query<String>
+        params: Query<CombinedQueryParams>
     ) -> Json<Vec<Question>> {
         Json(generate_maths(
             GeneratorParameters {
-                count: count.unwrap_or(3),
-                answer_count: answer_count.unwrap_or(3)
+                count: params.count.unwrap_or(3),
+                answer_count: params.answer_count.unwrap_or(3)
             },
             MathsGeneratorParameters {
                 operations:
-                    operations.split(',').collect::<Vec<_>>().iter().map(|o| ArithmeticOperation::from_str(o).unwrap()).collect()
+                    params.operations.split(',').collect::<Vec<_>>().iter().map(|o| ArithmeticOperation::from_str(o).unwrap()).collect()
             }
         ))
     }
