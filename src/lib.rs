@@ -1,11 +1,11 @@
+#[cfg(feature = "poem")]
 use poem_openapi::Object;
+#[cfg(feature = "poem")]
+use serde::Deserialize;
 
 pub mod generator;
 
-// TODO - decouple this from poem_openapi
-// This will involve making wrappers in the API itself around the structs in
-// this library, which might be doable with macros I've not discovered yet
-#[derive(Object)]
+#[cfg_attr(feature = "poem", derive(Object))]
 pub struct Question {
     text: String,
     answers: Vec<String>,

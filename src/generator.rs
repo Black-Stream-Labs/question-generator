@@ -1,1 +1,1 @@
-pub mod maths;
+pub mod arithmetic;
