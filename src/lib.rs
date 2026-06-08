@@ -3,7 +3,7 @@ use poem_openapi::Object;
 #[cfg(feature = "poem")]
 use serde::Deserialize;
 
-pub mod generator;
+pub mod strategy;
 
 #[cfg_attr(feature = "poem", derive(Object))]
 pub struct Question {
