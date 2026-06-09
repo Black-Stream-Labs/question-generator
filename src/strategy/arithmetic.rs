@@ -2,7 +2,7 @@
 //!
 //! Provides an interface to generate maths questions, using the generic GeneratorParameters from
 //! the crate as well as its own generator parameters struct.
-use crate::{Question, GeneratorParameters};
+use crate::{Question, GeneratorParameters, string_to_enum_vec};
 use rand::seq::{IndexedRandom, SliceRandom};
 use std::cmp;
 use std::str::FromStr;
@@ -24,15 +24,14 @@ pub enum ArithmeticOperation {
 ///
 /// Honoured values from the curriculum will be area, stage, level, and difficulty.
 /// Currently, area is used to define what operations to use, and difficulty will control the size
-/// of numbers used in the problems.
+/// of numbers used in the problems. Stage and level will be different ways of controlling the
+/// types of questions generated, e.g. simple sums or BIDMAS, division with or without remainder or
+/// fractional parts.
 pub fn generate(params: GeneratorParameters) -> Vec<Question> {
     let mut questions : Vec<Question> = vec![];
 
-    let operations : Vec<_> = params.curriculum.area.as_ref().unwrap_or(&"Addition".to_string())
-        .split(',')
-        .collect::<Vec<_>>().iter()
-        .map(|o| ArithmeticOperation::from_str(o).unwrap())
-        .collect();
+    let ops = params.curriculum.area.clone().unwrap_or("Addition".to_string());
+    let operations : Vec<ArithmeticOperation> = string_to_enum_vec(&ops).unwrap();
 
     for _ in 0 .. params.count {
         let operation = operations.choose(&mut rand::rng()).unwrap();
