@@ -2,11 +2,17 @@
 //!
 //! Provides an interface to generate maths questions, using the generic GeneratorParameters from
 //! the crate as well as its own generator parameters struct.
-use crate::{Question, GeneratorParameters, string_to_enum_vec};
+use crate::{
+    Question,
+    GeneratorParameters,
+    KeyStage,
+    string_to_enum_vec
+};
 use rand::seq::{IndexedRandom, SliceRandom};
-use std::cmp;
 use std::str::FromStr;
 use strum_macros::EnumString;
+
+mod addition;
 
 #[cfg(feature = "poem")]
 use serde::Deserialize;
@@ -27,7 +33,7 @@ pub enum ArithmeticOperation {
 /// of numbers used in the problems. Stage and level will be different ways of controlling the
 /// types of questions generated, e.g. simple sums or BIDMAS, division with or without remainder or
 /// fractional parts.
-pub fn generate(params: GeneratorParameters) -> Vec<Question> {
+pub fn generate(params: &GeneratorParameters) -> Vec<Question> {
     let mut questions : Vec<Question> = vec![];
 
     let ops = params.curriculum.area.clone().unwrap_or("Addition".to_string());
@@ -36,7 +42,7 @@ pub fn generate(params: GeneratorParameters) -> Vec<Question> {
     for _ in 0 .. params.count {
         let operation = operations.choose(&mut rand::rng()).unwrap();
         let question = match operation {
-            ArithmeticOperation::Addition => generate_addition(&params),
+            ArithmeticOperation::Addition => addition::generate_addition(&params),
             ArithmeticOperation::Subtraction => generate_subtraction(&params),
             ArithmeticOperation::Multiplication => generate_multiplication(&params),
             ArithmeticOperation::Division => generate_division(&params),
@@ -84,22 +90,15 @@ fn generate_answers(correct_answer:i32, count:usize, spread: i32, allow_negative
     (answers.iter().map(std::string::ToString::to_string).collect(), correct_answer_idx)
 }
 
-fn generate_addition(params: &GeneratorParameters) -> Question {
-    let num_1 = rand::random_range(1..10);
-    let num_2 = rand::random_range(1..10);
-
-    let correct_answer = num_1 + num_2;
-
-    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, false);
-
-    Question {
-        text: "`num_1` + `num_2` = ?".to_string(),
-        answers,
-        correct_answer: correct_answer_idx,
-        explanation: None
-    }
-}
-
+// Stage/level:
+//   Key Stage 1 - positive integers and zero
+//      Difficulty 1 - single-digit numbers
+//                 2 - maybe double-digit numbers, single-digit answers
+//                 3 - double-digit numbers, double-digit answers
+//                 4 - 3-digit - 1-digit
+//                 5 - 3-digit - 1/2/3-digit
+//   Key Stage 2 -
+//   Key Stage 3 -
 fn generate_subtraction(params: &GeneratorParameters) -> Question {
     let num_1 = rand::random_range(1..10);
     let num_2 = rand::random_range(1..10);
@@ -125,6 +124,15 @@ fn generate_subtraction(params: &GeneratorParameters) -> Question {
     }
 }
 
+// Stage/level: (FIXME)
+//   Key Stage 1 - 2, 5, 10 times tables
+//      Difficulty 1 - single-digit answers, or 10×<10
+//                 2 - double-digit answers, or up to 10×12
+//                 3 - up to 15×N
+//                 4 - sometimes 3 numbers, but answers up to 120
+//                 5 - sometimes 3 numbers, but answers up to 150
+//   Key Stage 2 -
+//   Key Stage 3 -
 fn generate_multiplication(params: &GeneratorParameters) -> Question {
     let num_1 = rand::random_range(1..10);
     let num_2 = rand::random_range(1..10);
@@ -141,6 +149,13 @@ fn generate_multiplication(params: &GeneratorParameters) -> Question {
     }
 }
 
+// Stage/level: (FIXME)
+//   Key Stage 1 - 2, 5, 10 times tables
+//      Difficulty 1 - single-digit answers, or 10×<10
+//                 2 - double-digit answers, or up to 10×12
+//                 3 - up to 15×N
+//   Key Stage 2 -
+//   Key Stage 3 -
 fn generate_division(params: &GeneratorParameters) -> Question {
     // TODO - here we inspect the curriculum (not yet implemented) to decide
     // which types of division we're going to use
