@@ -60,12 +60,10 @@ fn generate_answers(correct_answer:i32, count:usize, spread: i32, allow_negative
     // vector, so make a copy for the peripheral logic
     let count_i32 = count as i32;
 
-    if spread < count_i32 {
-        panic!("Spread must be at least as big as count!");
-    }
+    assert!(spread >= count_i32, "Spread must be at least as big as count!");
 
     let range = if allow_negative {
-        -(spread + count_i32) / 2 ..= (spread + count_i32) / 2
+        -i32::midpoint(spread, count_i32) ..= i32::midpoint(spread, count_i32)
     }
     else {
         // If the lowest value would be negative, work out what it would be and add it back on,
@@ -83,7 +81,7 @@ fn generate_answers(correct_answer:i32, count:usize, spread: i32, allow_negative
     let correct_answer_idx : usize = rand::random_range(0..answers.len());
     answers.insert(correct_answer_idx, correct_answer);
 
-    return (answers.iter().map(|n| n.to_string()).collect(), correct_answer_idx);
+    (answers.iter().map(std::string::ToString::to_string).collect(), correct_answer_idx)
 }
 
 fn generate_addition(params: &GeneratorParameters) -> Question {
@@ -95,8 +93,8 @@ fn generate_addition(params: &GeneratorParameters) -> Question {
     let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, false);
 
     Question {
-        text: format!("{} + {} = ?", num_1, num_2),
-        answers: answers,
+        text: "`num_1` + `num_2` = ?".to_string(),
+        answers,
         correct_answer: correct_answer_idx,
         explanation: None
     }
@@ -120,8 +118,8 @@ fn generate_subtraction(params: &GeneratorParameters) -> Question {
     let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, allow_negative);
 
     Question {
-        text: format!("{} + {} = ?", num_1, num_2),
-        answers: answers,
+        text: "`num_1` - `num_2` = ?".to_string(),
+        answers,
         correct_answer: correct_answer_idx,
         explanation: None
     }
@@ -136,8 +134,8 @@ fn generate_multiplication(params: &GeneratorParameters) -> Question {
     let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, false);
 
     Question {
-        text: format!("{} × {} = ?", num_1, num_2),
-        answers: answers,
+        text: "`num_1` × `num_2` = ?".to_string(),
+        answers,
         correct_answer: correct_answer_idx,
         explanation: None
     }
@@ -146,7 +144,7 @@ fn generate_multiplication(params: &GeneratorParameters) -> Question {
 fn generate_division(params: &GeneratorParameters) -> Question {
     // TODO - here we inspect the curriculum (not yet implemented) to decide
     // which types of division we're going to use
-    generate_integer_division(&params)
+    generate_integer_division(params)
 }
 
 fn generate_integer_division(params: &GeneratorParameters) -> Question {
@@ -161,10 +159,10 @@ fn generate_integer_division(params: &GeneratorParameters) -> Question {
     let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, false);
 
     Question {
-        text: format!("{} ÷ {} = ?", numerator, num_1),
-        answers: answers,
+        text: "`numerator` ÷ `num_1` = ?".to_string(),
+        answers,
         correct_answer: correct_answer_idx,
-        explanation: Some(format!("{} ÷ {} = {} because {} × {} = {}!", numerator, num_1, num_2, num_1, num_2, numerator))
+        explanation: Some("`numerator` ÷ `num_1` = `num_2` because `num_1` × `num_2` = `numerator`!".to_string())
     }
 }
 
@@ -187,15 +185,15 @@ fn generate_integer_division_with_remainder(params: &GeneratorParameters) -> Que
         let random_answer = correct_answer + (0 - rand::random_range(1..10)/2);
         let random_answer_remainder = rand::random_range(1..num_1);
 
-        answers.push(format!("{} remainder {}", random_answer, random_answer_remainder));
+        answers.push("`random_answer` remainder `random_answer_remainder`".to_string());
     }
 
     let correct_answer_idx : usize = rand::random_range(0..answers.len());
-    answers.insert(correct_answer_idx, format!("{} remainder {}", correct_answer, remainder));
+    answers.insert(correct_answer_idx, "`correct_answer` remainder `remainder`".to_string());
 
     Question {
-        text: format!("{} ÷ {} = ?", numerator, num_1),
-        answers: answers,
+        text: "`numerator` ÷ `num_1` = ?".to_string(),
+        answers,
         correct_answer: correct_answer_idx,
         explanation: None //Some(format!("{} ÷ {} = {} because {} × {} = {}!", numerator, num_1, num_2, num_1, num_2, numerator))
     }

@@ -1,3 +1,4 @@
+#![warn(clippy::pedantic)]
 #[cfg(feature = "poem")]
 use poem_openapi::Object;
 #[cfg(feature = "poem")]
