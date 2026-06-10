@@ -5,6 +5,7 @@ use poem_openapi::Object;
 use serde::Deserialize;
 
 use std::str::FromStr;
+use strum_macros::EnumString;
 
 pub mod strategy;
 
@@ -28,6 +29,15 @@ pub struct GeneratorParameters {
     pub count: usize,
     pub answer_count: usize,
     pub curriculum: Curriculum,
+}
+
+// Everything is passed by string between the user of the lib and the
+// generator strategies, to allow the strategies to extend any of the enums
+// at runtime. But we create some base enums anyway for things that are going
+// to be common across all curricula, just to avoid repetition.
+#[derive(EnumString)]
+pub enum KeyStage {
+    Foundation, KeyStage1, KeyStage2, KeyStage3, KeyStage4
 }
 
 fn string_to_enum_vec<T: FromStr>(string: &String) -> Result<Vec<T>, <T as FromStr>::Err> {
