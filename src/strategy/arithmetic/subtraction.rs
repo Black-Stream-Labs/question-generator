@@ -111,6 +111,9 @@ fn generate_subtraction_vals<T: Number>(num_nums: u16, num_range: Range<T>, ans_
         let this_num = rand::random_range(r);
         nums.insert(0, this_num);
         running_total += this_num;
+
+        // Only one zero please
+        if this_num == T::from(0) { running_total += T::from(1) }
     }
     // num_nums is a guideline but we need at least two, so create one from the difference between
     // ans and the existing number, which is probably zero if we got this far

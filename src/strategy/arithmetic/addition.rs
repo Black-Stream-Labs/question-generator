@@ -91,6 +91,12 @@ fn generate_addition_vals<T: Number>(num_nums: u16, num_range: Range<T>, ans_ran
         "Minimum answer must be at least `num_nums` * minimum number");
 
     let ans = rand::random_range(ans_range);
+
+    // Algorithm doesn't like picking a number from 0..0 N times
+    if ans == T::from(0) {
+        return (vec![0.into(); num_nums.into()], 0.into());
+    }
+
     let mut nums : Vec<T> = vec![];
     let mut running_total = ans;
 
@@ -127,6 +133,10 @@ mod tests {
         let (nums, ans) = generate_addition_vals::<i32>(5, 10..20, 100..200);
         assert!(nums.len() <= 5, "Got up to 5 numbers, as requested");
         assert_eq!(nums.iter().sum::<i32>(), ans, "They sum to the given answer");
+
+        let (nums, _) = generate_addition_vals::<i32>(5, 0..20, 0..0);
+        assert_eq!(nums.len(), 5, "Got 5 numbers, as requested");
+        assert_eq!(nums, vec![0;5]);
     }
 
     #[test]
