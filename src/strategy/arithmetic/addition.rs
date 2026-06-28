@@ -18,6 +18,7 @@ use crate::{
     KeyStage,
     string_to_enum_vec
 };
+use super::generate_wrong_answers_int;
 
 trait Number: Num
     + NumAssignOps
@@ -42,30 +43,51 @@ pub fn generate_addition(params: &GeneratorParameters) -> Question {
     let keystages : Vec<KeyStage> = string_to_enum_vec(& params.curriculum.stage.clone().unwrap()).unwrap();
     let ks = keystages.choose(&mut rand::rng()).unwrap();
 
-    let (nums, ans) = match ks {
+    let (nums, answers, correct_answer_idx) = match ks {
         KeyStage::Foundation => panic!("Foundation arithmetic not supported"),
         KeyStage::KeyStage1  => match params.curriculum.difficulty {
-            1 => generate_addition_vals::<i32>(2, 0..9, 0..9),
-            2 => generate_addition_vals::<i32>(3, 0..9, 0..15),
-            3 => generate_addition_vals::<i32>(3, 0..9, 0..30),
-            4 => generate_addition_vals::<i32>(4, 0..9, 0..30),
-            5 => generate_addition_vals::<i32>(4, 10..20, 20..80),
+            1 => {
+                let (n,a) = generate_addition_vals::<i32>(2, 0..9, 0..9);
+                let (w, i) = generate_wrong_answers_int(a, params.count, 0, 9);
+                (n,w,i)
+            },
+            2 => {
+                let (n,a) = generate_addition_vals::<i32>(3, 0..9, 0..15);
+                let (w,i) = generate_wrong_answers_int(a, params.count, 0, 20);
+                (n,w,i)
+            },
+            3 => {
+                let (n,a) = generate_addition_vals::<i32>(2, 0..9, 0..30);
+                let (w,i) = generate_wrong_answers_int(a, params.count, 0, 45);
+                (n,w,i)
+            },
+            4 => {
+                let (n,a) = generate_addition_vals::<i32>(4, 0..9, 0..30);
+                let (w,i) = generate_wrong_answers_int(a, params.count, 0, 45);
+                (n,w,i)
+            },
+            5 => {
+                let (n,a) = generate_addition_vals::<i32>(2, 10..20, 20..80);
+                let (w,i) = generate_wrong_answers_int(a, params.count, 0, 100);
+                (n,w,i)
+            },
+            // TODO: use errors, not panics
             _ => panic!("addition difficulty goes up to 5")
         },
         _ => panic!("Not yet implemented")
     };
 
     Question {
-        text: "`num_1` + `num_2` = ?".to_string(),
-        answers: nums.iter().map(|n| n.to_string()).collect(),
-        correct_answer: 0,
+        text: (nums.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" + ") + " = ?").to_string(),
+        answers: answers.iter().map(|n| n.to_string()).collect(),
+        correct_answer: correct_answer_idx,
         explanation: None
     }
 }
 
 fn generate_addition_vals<T: Number>(num_nums: u16, num_range: Range<T>, ans_range: Range<T>)
     -> (Vec<T>, T) {
-    assert!(ans_range.start >= num_range.start * T::from(num_nums as i32),
+    assert!(ans_range.start >= num_range.start * T::from(i32::from(num_nums)),
         "Minimum answer must be at least `num_nums` * minimum number");
 
     let ans = rand::random_range(ans_range);
@@ -76,7 +98,10 @@ fn generate_addition_vals<T: Number>(num_nums: u16, num_range: Range<T>, ans_ran
     // less than the sum so far and add it to the list. Then for the Nth number
     // just use what's left.
     for _ in 1..num_nums {
-        let this_num = rand::random_range(num_range.start..running_total);
+        let r = num_range.start..running_total;
+        if r.is_empty() { break }
+
+        let this_num = rand::random_range(r);
         running_total -= this_num;
         nums.push(this_num);
     }
@@ -85,27 +110,9 @@ fn generate_addition_vals<T: Number>(num_nums: u16, num_range: Range<T>, ans_ran
     (nums, ans)
 }
 
-// We have a different algorithm for generating floating point values, so we put the type in the
-// function name, not in a template. We're not flexible on types here because we'll never be using
-// this to produce mahoosive numbers ... right?
-fn generate_wrong_answers_int(
-    correct_answer: i32, count:u16, min_: i32, max_: i32) -> (Vec<i32>, usize) {
-    let (min,max) = if min_ > max_ { (max_, min_) } else { (min_, max_) };
-
-    let range = min..=max;
-    assert!(range.end() - range.start() >= count.into(), "Spread must be at least as big as count!");
-
-    let mut wrong_answers : Vec<i32> = range.collect();
-    wrong_answers.retain(|x| *x != correct_answer);
-    wrong_answers.shuffle(&mut rand::rng());
-
-    let mut answers = wrong_answers[0..count as usize].to_vec();
-
-    let correct_answer_idx : usize = rand::random_range(0..answers.len());
-    answers.insert(correct_answer_idx, correct_answer);
-
-    (answers, correct_answer_idx)
-}
+//fn generate_wrong_answers_float(
+//    correct_answer: f32, count: u16, min_: f32, max_: f32, dp: u16) -> (Vec<f32>, usize) {
+//}
 
 #[cfg(test)]
 mod tests {
@@ -115,6 +122,10 @@ mod tests {
     fn addition_vals() {
         let (nums, ans) = generate_addition_vals::<i32>(2, 0..9, 2..9);
         assert_eq!(nums.len(), 2, "Got 2 numbers, as requested");
+        assert_eq!(nums.iter().sum::<i32>(), ans, "They sum to the given answer");
+
+        let (nums, ans) = generate_addition_vals::<i32>(5, 10..20, 100..200);
+        assert!(nums.len() <= 5, "Got up to 5 numbers, as requested");
         assert_eq!(nums.iter().sum::<i32>(), ans, "They sum to the given answer");
     }
 

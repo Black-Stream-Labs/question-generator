@@ -91,6 +91,32 @@ fn generate_answers(correct_answer:i32, count:usize, spread: i32, allow_negative
     (answers.iter().map(std::string::ToString::to_string).collect(), correct_answer_idx)
 }
 
+// We have a different algorithm for generating floating point values, so we put the type in the
+// function name, not in a template. We're not flexible on types here because we'll never be using
+// this to produce mahoosive numbers ... right?
+pub fn generate_wrong_answers_int(
+    correct_answer: i32, count:u16, min_: i32, max_: i32) -> (Vec<i32>, usize) {
+    let (min,max) = if min_ > max_ { (max_, min_) } else { (min_, max_) };
+
+    let range = min..=max;
+    assert!(range.end() - range.start() >= count.into(), "Spread must be at least as big as count!");
+
+    let mut wrong_answers : Vec<i32> = range.collect();
+    wrong_answers.retain(|x| *x != correct_answer);
+    wrong_answers.shuffle(&mut rand::rng());
+
+    let mut answers = wrong_answers[0..count as usize].to_vec();
+
+    let correct_answer_idx : usize = rand::random_range(0..answers.len());
+    answers.insert(correct_answer_idx, correct_answer);
+
+    (answers, correct_answer_idx)
+}
+
+//fn generate_wrong_answers_float(
+//    correct_answer: f32, count: u16, min_: f32, max_: f32, dp: u16) -> (Vec<f32>, usize) {
+//}
+
 // Stage/level:
 //   Key Stage 1 - positive integers and zero
 //      Difficulty 1 - single-digit numbers
