@@ -26,8 +26,8 @@ pub struct Curriculum {
 }
 
 pub struct GeneratorParameters {
-    pub count: u16,
-    pub answer_count: u16,
+    pub count: usize,
+    pub answer_count: usize,
     pub curriculum: Curriculum,
 }
 

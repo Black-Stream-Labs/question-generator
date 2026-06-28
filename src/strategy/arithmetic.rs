@@ -14,6 +14,7 @@ use strum_macros::EnumString;
 use std::cmp;
 
 mod addition;
+mod subtraction;
 
 #[cfg(feature = "poem")]
 use serde::Deserialize;
@@ -44,7 +45,7 @@ pub fn generate(params: &GeneratorParameters) -> Vec<Question> {
         let operation = operations.choose(&mut rand::rng()).unwrap();
         let question = match operation {
             ArithmeticOperation::Addition => addition::generate_addition(&params),
-            ArithmeticOperation::Subtraction => generate_subtraction(&params),
+            ArithmeticOperation::Subtraction => subtraction::generate_subtraction(&params),
             ArithmeticOperation::Multiplication => generate_multiplication(&params),
             ArithmeticOperation::Division => generate_division(&params),
         };
@@ -95,11 +96,11 @@ fn generate_answers(correct_answer:i32, count:usize, spread: i32, allow_negative
 // function name, not in a template. We're not flexible on types here because we'll never be using
 // this to produce mahoosive numbers ... right?
 pub fn generate_wrong_answers_int(
-    correct_answer: i32, count:u16, min_: i32, max_: i32) -> (Vec<i32>, usize) {
+    correct_answer: i32, count:usize, min_: i32, max_: i32) -> (Vec<i32>, usize) {
     let (min,max) = if min_ > max_ { (max_, min_) } else { (min_, max_) };
 
     let range = min..=max;
-    assert!(range.end() - range.start() >= count.into(), "Spread must be at least as big as count!");
+    assert!((range.end() - range.start()) as usize >= count, "Spread must be at least as big as count!");
 
     let mut wrong_answers : Vec<i32> = range.collect();
     wrong_answers.retain(|x| *x != correct_answer);
@@ -116,41 +117,6 @@ pub fn generate_wrong_answers_int(
 //fn generate_wrong_answers_float(
 //    correct_answer: f32, count: u16, min_: f32, max_: f32, dp: u16) -> (Vec<f32>, usize) {
 //}
-
-// Stage/level:
-//   Key Stage 1 - positive integers and zero
-//      Difficulty 1 - single-digit numbers
-//                 2 - maybe double-digit numbers, single-digit answers
-//                 3 - double-digit numbers, double-digit answers
-//                 4 - 3-digit - 1-digit
-//                 5 - 3-digit - 1/2/3-digit
-//   Key Stage 2 -
-//   Key Stage 3 -
-fn generate_subtraction(params: &GeneratorParameters) -> Question {
-    let num_1 = rand::random_range(1..10);
-    let num_2 = rand::random_range(1..10);
-
-    let allow_negative = false; // Something based on params.curriculum
-
-    let correct_answer = if allow_negative {
-        num_1 - num_2
-    }
-    else {
-        let bignum = cmp::max(num_1, num_2);
-        let smlnum = cmp::min(num_1, num_2);
-        bignum - smlnum
-    };
-
-    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, allow_negative);
-
-    Question {
-        text: "`num_1` - `num_2` = ?".to_string(),
-        answers,
-        correct_answer: correct_answer_idx,
-        explanation: None
-    }
-}
-
 // Stage/level: (FIXME)
 //   Key Stage 1 - 2, 5, 10 times tables
 //      Difficulty 1 - single-digit answers, or 10×<10
@@ -238,5 +204,27 @@ fn generate_integer_division_with_remainder(params: &GeneratorParameters) -> Que
         answers,
         correct_answer: correct_answer_idx,
         explanation: None //Some(format!("{} ÷ {} = {} because {} × {} = {}!", numerator, num_1, num_2, num_1, num_2, numerator))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn wrong_answers_int() {
+        let (answers, index) = generate_wrong_answers_int(5, 5, 0, 10);
+        assert!(answers.clone().into_iter().filter(|n| *n < 0).collect::<Vec<_>>().is_empty(),
+            "All values min 0");
+        assert!(answers.clone().into_iter().filter(|n| *n > 10).collect::<Vec<_>>().is_empty(),
+            "All values max 10");
+        assert_eq!(answers[index], 5, "Answer in the correct index");
+
+        let (answers, index) = generate_wrong_answers_int(5, 5, -10, 10);
+        assert!(answers.clone().into_iter().filter(|n| *n < -10).collect::<Vec<_>>().is_empty(),
+            "All values min -10");
+        assert!(answers.clone().into_iter().filter(|n| *n > 10).collect::<Vec<_>>().is_empty(),
+            "All values max 10");
+        assert_eq!(answers[index], 5, "Answer in the correct index");
     }
 }
