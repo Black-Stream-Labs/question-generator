@@ -48,27 +48,27 @@ pub fn generate_addition(params: &GeneratorParameters) -> Question {
         KeyStage::KeyStage1  => match params.curriculum.difficulty {
             1 => {
                 let (n,a) = generate_addition_vals::<i32>(2, 0..9, 0..9);
-                let (w, i) = generate_wrong_answers_int(a, params.count, 0, 9);
+                let (w, i) = generate_wrong_answers_int(a, params.answer_count, 0, 9);
                 (n,w,i)
             },
             2 => {
                 let (n,a) = generate_addition_vals::<i32>(3, 0..9, 0..15);
-                let (w,i) = generate_wrong_answers_int(a, params.count, 0, 20);
+                let (w,i) = generate_wrong_answers_int(a, params.answer_count, 0, 20);
                 (n,w,i)
             },
             3 => {
                 let (n,a) = generate_addition_vals::<i32>(2, 0..9, 0..30);
-                let (w,i) = generate_wrong_answers_int(a, params.count, 0, 45);
+                let (w,i) = generate_wrong_answers_int(a, params.answer_count, 0, 45);
                 (n,w,i)
             },
             4 => {
                 let (n,a) = generate_addition_vals::<i32>(4, 0..9, 0..30);
-                let (w,i) = generate_wrong_answers_int(a, params.count, 0, 45);
+                let (w,i) = generate_wrong_answers_int(a, params.answer_count, 0, 45);
                 (n,w,i)
             },
             5 => {
                 let (n,a) = generate_addition_vals::<i32>(2, 10..20, 20..80);
-                let (w,i) = generate_wrong_answers_int(a, params.count, 0, 100);
+                let (w,i) = generate_wrong_answers_int(a, params.answer_count, 0, 100);
                 (n,w,i)
             },
             // TODO: use errors, not panics
