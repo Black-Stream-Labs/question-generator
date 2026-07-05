@@ -78,7 +78,7 @@ pub fn generate_addition(params: &GeneratorParameters) -> Question {
     };
 
     Question {
-        text: (nums.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" + ") + " = ?").to_string(),
+        text: (nums.iter().map(|n| n.to_string()).collect::<Vec<_>>().join(" + ") + " = ?"),
         answers: answers.iter().map(|n| n.to_string()).collect(),
         correct_answer: correct_answer_idx,
         explanation: None
