@@ -7,7 +7,7 @@
 //                 5 - up to 4 numbers, all double-digit
 //   Key Stage 2 -
 //   Key Stage 3 -
-use rand::seq::{IndexedRandom, SliceRandom};
+use rand::seq::{IndexedRandom};
 use std::ops::Range;
 use std::cmp::{PartialOrd, PartialEq};
 use num_traits::{Num, NumAssignOps};

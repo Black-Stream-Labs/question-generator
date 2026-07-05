@@ -5,13 +5,10 @@
 use crate::{
     Question,
     GeneratorParameters,
-    KeyStage,
     string_to_enum_vec
 };
 use rand::seq::{IndexedRandom, SliceRandom};
-use std::str::FromStr;
 use strum_macros::EnumString;
-use std::cmp;
 
 mod addition;
 mod subtraction;
@@ -45,10 +42,10 @@ pub fn generate(params: &GeneratorParameters) -> Vec<Question> {
     for _ in 0 .. params.count {
         let operation = operations.choose(&mut rand::rng()).unwrap();
         let question = match operation {
-            ArithmeticOperation::Addition => addition::generate_addition(&params),
-            ArithmeticOperation::Subtraction => subtraction::generate_subtraction(&params),
-            ArithmeticOperation::Multiplication => generate_multiplication(&params),
-            ArithmeticOperation::Division => division::generate_division(&params),
+            ArithmeticOperation::Addition => addition::generate_addition(params),
+            ArithmeticOperation::Subtraction => subtraction::generate_subtraction(params),
+            ArithmeticOperation::Multiplication => generate_multiplication(params),
+            ArithmeticOperation::Division => division::generate_division(params),
         };
 
         questions.push(question);
