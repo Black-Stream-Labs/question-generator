@@ -12,6 +12,7 @@ use strum_macros::EnumString;
 
 mod addition;
 mod subtraction;
+mod multiplication;
 mod division;
 
 #[cfg(feature = "poem")]
@@ -44,7 +45,7 @@ pub fn generate(params: &GeneratorParameters) -> Vec<Question> {
         let question = match operation {
             ArithmeticOperation::Addition => addition::generate_addition(params),
             ArithmeticOperation::Subtraction => subtraction::generate_subtraction(params),
-            ArithmeticOperation::Multiplication => generate_multiplication(params),
+            ArithmeticOperation::Multiplication => multiplication::generate_multiplication(params),
             ArithmeticOperation::Division => division::generate_division(params),
         };
 
@@ -115,30 +116,6 @@ pub fn generate_wrong_answers_int(
 //fn generate_wrong_answers_float(
 //    correct_answer: f32, count: u16, min_: f32, max_: f32, dp: u16) -> (Vec<f32>, usize) {
 //}
-// Stage/level: (FIXME)
-//   Key Stage 1 - 2, 5, 10 times tables
-//      Difficulty 1 - single-digit answers, or 10×<10
-//                 2 - double-digit answers, or up to 10×12
-//                 3 - up to 15×N
-//                 4 - sometimes 3 numbers, but answers up to 120
-//                 5 - sometimes 3 numbers, but answers up to 150
-//   Key Stage 2 -
-//   Key Stage 3 -
-fn generate_multiplication(params: &GeneratorParameters) -> Question {
-    let num_1 = rand::random_range(1..10);
-    let num_2 = rand::random_range(1..10);
-
-    let correct_answer = num_1 * num_2;
-
-    let (answers, correct_answer_idx) = generate_answers(correct_answer, params.answer_count, 20, false);
-
-    Question {
-        text: "`num_1` × `num_2` = ?".to_string(),
-        answers,
-        correct_answer: correct_answer_idx,
-        explanation: None
-    }
-}
 
 
 #[cfg(test)]
